@@ -1,12 +1,20 @@
 # from https://github.com/cvzone/cvzone/blob/master/Examples/HandTrackingExample.py
+import os
 
 from cvzone.HandTrackingModule import HandDetector
 import cv2
 from pynput.keyboard import Key,Controller
 import time
-from Peace import Peace
-from FourFingersCloseTogether import FourFingersCloseTogether
-from FourFingersSpreadApart import FourFingersSpreadApart
+from dotenv import load_dotenv
+from hand_models.Peace import Peace
+from hand_models.FourFingersCloseTogether import FourFingersCloseTogether
+from hand_models.FourFingersSpreadApart import FourFingersSpreadApart
+from philips_hue.philipsHue import PhilipsHue
+
+load_dotenv()
+userId = os.getenv('PHILIPSUSERID')
+lightController = PhilipsHue(userId)
+lightGroups = lightController.lightGroups
 
 keyboard = Controller()
 capture = cv2.VideoCapture(0)
@@ -31,26 +39,18 @@ while True:
         fourFingersOpen = FourFingersSpreadApart(hand1, detector).isShowing()
 
         if fourFingersOpen:
-            #volume up
-            keyboard.press(Key.media_volume_up)
-            keyboard.release(Key.media_volume_up)
-            time.sleep(0.5)
+            #brightness up
+            lightGroups["Bedroom"].brightnessUp()
+            time.sleep(0.05)
 
         if fourFingersClose:
-            #volume down
-            keyboard.press(Key.media_volume_down)
-            keyboard.release(Key.media_volume_down)
-            time.sleep(0.5)
+            # brightness down
+            lightGroups["Bedroom"].brightnessDown()
+            time.sleep(0.05)
 
         if peace:
-            # full screen shortcut toggle
-            keyboard.press(Key.cmd)
-            keyboard.press(Key.ctrl)
-            keyboard.press('f')
-
-            keyboard.release(Key.cmd)
-            keyboard.release(Key.ctrl)
-            keyboard.release('f')
+            #toggle bedroom lights
+            lightGroups["Bedroom"].toggle()
             time.sleep(2)
 
 
